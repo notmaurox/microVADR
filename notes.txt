@@ -1,0 +1,18 @@
+Followed this guide...
+https://www.freecodecamp.org/news/structuring-a-flask-restplus-web-service-for-production-builds-c2ec676de563/
+
+run both services...
+
+docker-compose up
+
+while services are running, sh into backend container...
+
+docker-compose exec backend sh
+
+# push python models to db
+python manager.py db init
+python manager.py db migrate
+python manager.py db upgrade
+
+# this should work?
+python manage.py test
