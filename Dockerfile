@@ -7,7 +7,7 @@ COPY . /app
 
 # The following adapted from https://github.com/andersgs/docker-builds/blob/master/vadr/1.1.2/Dockerfile
 ENV VADR_VERSION="1.1.3"\
-  VADR_CORONA_MODELS_VERSION="1.2-1" \
+  VADR_CORONA_MODELS_VERSION="1.2-2" \
   LC_ALL=C \
   VADRINSTALLDIR=/opt/vadr
 
@@ -18,7 +18,8 @@ ENV VADRSCRIPTSDIR=$VADRINSTALLDIR/vadr \
  VADRHMMERDIR=$VADRINSTALLDIR/hmmer/binaries \
  VADRBIOEASELDIR=$VADRINSTALLDIR/Bio-Easel \
  VADRSEQUIPDIR=$VADRINSTALLDIR/sequip \
- VADRBLASTDIR=$VADRINSTALLDIR/ncbi-blast/bin
+ VADRBLASTDIR=$VADRINSTALLDIR/ncbi-blast/bin \
+ VADRFASTADIR=$VADRINSTALLDIR/fasta/bin
 
 ENV PERL5LIB=$VADRSCRIPTSDIR:$VADRSEQUIPDIR:$VADRBIOEASELDIR/blib/lib:$VADRBIOEASELDIR/blib/arch:$PERL5LIB \
  PATH=$VADRSCRIPTSDIR:$PATH
@@ -41,6 +42,7 @@ RUN mkdir -p ${VADRINSTALLDIR} && \
  bash /app/vadr-install.sh linux
 
 # install the latest corona virus models
-RUN wget -O vadr-models-corona.tar.gz https://ftp.ncbi.nlm.nih.gov/pub/nawrocki/vadr-models/coronaviridae/${VADR_CORONA_MODELS_VERSION}/vadr-models-corona-${VADR_CORONA_MODELS_VERSION}.tar.gz -T 250
+RUN wget -O vadr-models-corona.tar.gz https://ftp.ncbi.nlm.nih.gov/pub/nawrocki/vadr-models/coronaviridae/CURRENT/vadr-models-corona-${VADR_CORONA_MODELS_VERSION}.tar.gz -T 250
 RUN mkdir -p ${VADRMODELDIR}
 RUN tar -xf vadr-models-corona.tar.gz -C ${VADRMODELDIR}
+ENV VADRMODELDIR=${VADRMODELDIR}/vadr-models-corona-${VADR_CORONA_MODELS_VERSION}

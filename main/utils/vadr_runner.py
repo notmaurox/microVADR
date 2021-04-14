@@ -44,14 +44,18 @@ class VadrRunner:
             seq_fasta.write(f">{self.seq_name}\n{self.seq}")
 
     def _start_vadr(self):
+        # usage comes from...
+        # /opt/vadr/vadr-models/vadr-models-corona-1.2-2/00README.txt
         vadr_cmd = [
-            "v-annotate.pl", "--mxsize", "6000", "-s", "-r",
-            "--nomisc", "--lowsim5term", "2",
-            "--lowsim3term", "2", "--fstlowthr", "0.0",
+            "v-annotate.pl", "--split", "--cpu", "8", "--glsearch", "-s",
+            "-r", "--nomisc", "--mkey", "corona", "--lowsim5term", "2",
+            "--lowsim3term", "2",
             "--alt_fail", "lowscore,fsthicnf,fstlocnf,insertnn,deletinn",
-            "--mdir", MODEL_DIR, self.fasta_path, self.results_dir
+            "--mdir", "/opt/vadr/vadr-models/vadr-models-corona-1.2-2",
+            self.fasta_path, self.results_dir
         ]
         logger.info(f'Starting VADR for run: {self.run_id}')
+        logger.info(' '.join(vadr_cmd))
         subprocess.Popen(vadr_cmd)
 
     def _load_results(self):
