@@ -1,6 +1,7 @@
 import os
 import subprocess
 import logging
+import re
 
 VADR_FILE_STORE = "/tmp/vadr_runs"
 MODEL_DIR = os.getenv("VADRMODELDIR")
@@ -59,12 +60,22 @@ class VadrRunner:
         subprocess.Popen(vadr_cmd)
 
     def _load_results(self):
-    # parse results to dict, return dict.
-        pass
+        ftr_results_file = os.path.join(self.results_dir, "results.vadr.ftr")
+        VadrResultsFtr(ftr_results_file)
 
     def _run_finished(self):
+        # check that files to be parsed exist...
+        files_to_check_for = [
+            "results.vadr.fail.tbl",
+            "results.vadr.pass.tbl",
+            "results.vadr.cmd",
+            "results.vadr.ftr"
+        ]
         # if there are results files, there are
-        return False
+        for file_name in files_to_check_for:
+            if not os.path.isfile(os.path.join(self.results_dir, file_name)):
+                return False
+        return True
 
     @staticmethod
     def is_run_dir(run_id):
@@ -72,6 +83,39 @@ class VadrRunner:
             return True
         else:
             return False
+
+
+class VadrResultsFtr:
+
+    def __init__(self, path_to_ftr_file):
+        self.file = path_to_ftr_file
+        self.seq_length = None
+        self.seq_vadr_status = None
+        self.model = None
+        self.features = []
+
+        self._load_data_from_file()
+
+    def _load_data_from_file(self):
+        with open(self.file, "r") as res_file:
+            for row in res_file:
+                if row.startswith('#'):
+                    continue
+                else:
+                    elems = re.sub(' +', 'SPLIT_STR', row).strip().split('SPLIT_STR')
+                    if not self.seq_length:
+                        self.seq_length = elems[2]
+                        self.seq_vadr_status = elems[3]
+                        self.model = elems[4]
+                    feature = {
+                        "type": elems[5],
+                        "name": elems[6],
+                        "start": elems[11],
+                        "end": elems[12],
+                        "seq_coords": elems[23],
+                        "alerts": elems[25]
+                    }
+                    self.features.append(feature)
 
 
     
