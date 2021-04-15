@@ -28,26 +28,26 @@ def start_new_run(data):
             response_object = {
                 'status': 'success',
                 'message': 'New run submitted',
-                'run_id': new_vadr_run.run_id,
+                'process_id': new_vadr_run.process_id,
             }
             VadrRunner(
                 seq_name=data['sequence_name'],
                 seq=data['sequence'],
-                run_id=process_id,
+                process_id=process_id,
             ).go()
             return response_object, 201
         except Exception as e:
             response_object = {
                 'status': 'fail',
                 'message': str(e),
-                'run_id': None
+                'process_id': None
             }
             return response_object, 500
     else:
         response_object = {
             'status': 'fail',
             'message': 'Something broke oopies',
-            'run_id': None
+            'process_id': None
         }
         return response_object, 409
 
@@ -56,8 +56,8 @@ def get_all_runs():
     return VadrRun.query.all()
 
 
-def get_a_run(run_id):
-    return VadrRun.query.filter_by(run_id=run_id).first()
+def get_a_run(process_id):
+    return VadrRun.query.filter_by(process_id=process_id).first()
 
 
 def save_changes(data):

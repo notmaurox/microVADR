@@ -11,31 +11,40 @@ logger = logging.getLogger('microVadr')
 
 class VadrRunner:
 
-    def __init__(self, seq_name, seq, run_id):
+    def __init__(self, seq_name, seq, process_id):
         self.seq_name, self.seq = seq_name, seq
-        self.run_id = run_id
+        self.process_id = process_id
         self.run_folder = os.path.join(
             VADR_FILE_STORE,
-            str(run_id)
+            str(process_id)
         )
         self.fasta_path = os.path.join(
             self.run_folder,
-            f"{str(self.run_id)}_seq.fasta"
+            f"{str(self.process_id)}_seq.fasta"
         )
         self.results_dir = os.path.join(
             self.run_folder,
             "results"
         )
+        self.results_dict = None
 
     def go(self):
-        logger.info('in go')
+        logger.info(f'go called for process: {self.process_id}')
         if not os.path.isdir(self.run_folder):
+            logger.info(f'making dir for process: {self.process_id}')
             os.makedirs(self.run_folder)
             self._start_run()
         elif self._run_finished():
+            logger.info(f'VADR finished for process: {self.process_id}')
             self._load_results()
+        else:
+            logger.info(f'VADR not finished for process: {self.process_id}')
+
+    def get_results(self):
+        return self.results_dict
 
     def _start_run(self):
+        logger.info(f'starting VADR for process: {self.process_id}')
         self._write_fasta()
         self._start_vadr()
 
@@ -55,13 +64,13 @@ class VadrRunner:
             "--mdir", "/opt/vadr/vadr-models/vadr-models-corona-1.2-2",
             self.fasta_path, self.results_dir
         ]
-        logger.info(f'Starting VADR for run: {self.run_id}')
+        logger.info(f'Starting VADR for run: {self.process_id}')
         logger.info(' '.join(vadr_cmd))
         subprocess.Popen(vadr_cmd)
 
     def _load_results(self):
         ftr_results_file = os.path.join(self.results_dir, "results.vadr.ftr")
-        VadrResultsFtr(ftr_results_file)
+        self.results_dict = VadrResultsFtr(ftr_results_file).serialize()
 
     def _run_finished(self):
         # check that files to be parsed exist...
@@ -74,12 +83,13 @@ class VadrRunner:
         # if there are results files, there are
         for file_name in files_to_check_for:
             if not os.path.isfile(os.path.join(self.results_dir, file_name)):
+                logger.info(f"run {self.process_id} missing {file_name} in {self.results_dir}")
                 return False
         return True
 
     @staticmethod
-    def is_run_dir(run_id):
-        if os.path.isdir(os.path.join(VADR_FILE_STORE, str(run_id))):
+    def is_run_dir(process_id):
+        if os.path.isdir(os.path.join(VADR_FILE_STORE, str(process_id))):
             return True
         else:
             return False
@@ -116,6 +126,15 @@ class VadrResultsFtr:
                         "alerts": elems[25]
                     }
                     self.features.append(feature)
+
+    def serialize(self):
+        to_return = {
+            "VADR_status": str(self.seq_vadr_status),
+            "seq_length": str(self.seq_length),
+            "model_used": str(self.model),
+            "sequence_features": self.features
+        }
+        return to_return
 
 
     
