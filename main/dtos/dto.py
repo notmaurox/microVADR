@@ -5,4 +5,5 @@ class VadrRunDto:
     vadr_run = api.model('vadrrun', {
         'sequence_name': fields.String(required=True, description='user email address'),
         'sequence': fields.String(required=True, description='user username'),
+        'password': fields.String(required=True, description='password to submit run (default: iamyourfather, can overwrite with MICROVADRPASS env variable within docker-compose file)'),
     })
