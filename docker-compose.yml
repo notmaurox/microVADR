@@ -13,7 +13,7 @@ services:
     depends_on:
       - db
     environment:
-      - MICROVADRPASS=mypass
+      - MICROVADRPASS=iamyourfather
 
   db:
     image: mysql:5.7.22
