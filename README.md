@@ -26,8 +26,10 @@ and returns a paylod of the form...
         "process_id": NNNNNNNN
     }
 ```
-* unless something goes wrong
-The process_id will always be a random 8 digit number which can be passed into the next endpoint via a get request. The password field is included as a cheap way to make sure only good requests go on to use compute resources to processes the submitted sequece. The password can be changed via the MICROVADRPASS enviornment variable in the docker-compose file. 
+***unless something goes wrong***
+The process_id will always be a random 8 digit number which can be passed into the next endpoint via a get request...
+
+The password field is included as a cheap way to make sure only good requests go on to use compute resources to processes the submitted sequece. The password can be changed via the MICROVADRPASS enviornment variable in the docker-compose file. 
 
 #### /vadr/<process_id>
 This endpoint accepts a process_id. If the run has finished, the response will look like...
